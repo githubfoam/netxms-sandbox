@@ -1,0 +1,37 @@
+name: "Ubuntu netxms CI workflow"
+
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+
+  #https://www.netxms.org/documentation/adminguide/installation.html#add-apt-repository
+  ubuntu-1604-netmx-manually-job:
+    name: "ubuntu-16.04 netmx manually job"
+    runs-on: ubuntu-16.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: "os fingerprinting"
+      run: hostnamectl status
+    - name: "Add the repository manually"
+      run: |
+        echo "deb http://packages.netxms.org/$(lsb_release -si | tr A-Z a-z) $(lsb_release -sc | tr A-Z a-z) main" | sudo tee /etc/apt/sources.list.d/netxms.list
+        wget -q -O - http://packages.netxms.org/netxms.gpg | sudo apt-key add -
+        sudo apt-get update -qq
+
+
+  #https://www.netxms.org/documentation/adminguide/installation.html#add-apt-repository
+  ubuntu-1604-netmx-package-job:
+    name: "ubuntu-16.04 netxms-release package job"
+    runs-on: ubuntu-16.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: "os fingerprinting"
+      run: hostnamectl status
+    - name: "Add the repository using netxms-release package"
+      run: |
+        wget http://packages.netxms.org/netxms-release-latest.deb
+        sudo dpkg -i netxms-release-latest.deb
+        sudo apt-get update -qq
